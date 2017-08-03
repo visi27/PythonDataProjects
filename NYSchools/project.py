@@ -1,4 +1,6 @@
 import pandas as pd
+import re
+
 pd.set_option('display.width', 200)
 data_files = [
     "ap_2010.csv",
@@ -40,7 +42,6 @@ columns_to_keep = ["DBN", "rr_s", "rr_t", "rr_p", "N_s", "N_t", "N_p", "saf_p_11
 # filter the dataframe
 survey = survey.loc[:, columns_to_keep]
 data["survey"] = survey
-data["survey"].head()
 
 # Uppercase DBN so it is consistent with the other data sets in data dictionary
 data["hs_directory"]["DBN"] = data["hs_directory"]["dbn"]
@@ -50,4 +51,40 @@ data["class_size"]["padded_csd"] = data["class_size"]["CSD"].apply(lambda x: str
 
 # Concat the newly created padded_csd with SCHOOL CODE to get DBN
 data["class_size"]["DBN"] = data["class_size"]["padded_csd"] + data["class_size"]["SCHOOL CODE"]
-data["class_size"].head()
+
+# Calculate total SAT score from individual sat scores
+data["sat_results"]["SAT Math Avg. Score"] = pd.to_numeric(data["sat_results"]["SAT Math Avg. Score"], errors='coerce')
+data["sat_results"]["SAT Critical Reading Avg. Score"] = pd.to_numeric(
+    data["sat_results"]["SAT Critical Reading Avg. Score"], errors='coerce')
+data["sat_results"]["SAT Writing Avg. Score"] = pd.to_numeric(data["sat_results"]["SAT Writing Avg. Score"],
+                                                              errors='coerce')
+data["sat_results"]["sat_score"] = data["sat_results"]["SAT Math Avg. Score"] + data["sat_results"][
+    "SAT Critical Reading Avg. Score"] + data["sat_results"]["SAT Writing Avg. Score"]
+
+print(data["sat_results"]["sat_score"].head())
+
+
+# Extract location coordinate of schools
+# Define functions to extract latitude and longitude
+def extract_lat(loc):
+    coords = re.findall("\(.+\)", loc)
+    if len(coords) > 0:
+        lat = coords[0].split(",")[0].replace("(", "")
+        return lat
+    return ""
+
+
+def extract_lon(loc):
+    coords = re.findall("\(.+\)", loc)
+    if len(coords) > 0:
+        lat = coords[0].split(",")[1].replace(")", "")
+        return lat
+    return ""
+
+# apply the functions
+data["hs_directory"]["lat"] = data["hs_directory"]["Location 1"].apply(lambda x: extract_lat(x))
+data["hs_directory"]["lon"] = data["hs_directory"]["Location 1"].apply(lambda x: extract_lon(x))
+
+# Convert latitude and longitude values to numeric
+data["hs_directory"]["lat"] = pd.to_numeric(data["hs_directory"]["lat"], errors='coerce')
+data["hs_directory"]["lon"] = pd.to_numeric(data["hs_directory"]["lon"], errors='coerce')
