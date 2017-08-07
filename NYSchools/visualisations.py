@@ -1,6 +1,6 @@
 # Continued from project.py. Check and combine together with jupyter notebook
 
-# Compte correlations between columns in the dataset
+# Compute correlations between columns in the dataset
 correlations = combined.corr()
 
 # Keep only the column with correlations to sat_result
