@@ -96,13 +96,16 @@ point_100_std = (point_100 - mean) / std_dev
 plt.scatter(nba_stats["fga"], nba_stats["pts"])
 plt.show()
 
-# If we make points negative (so the people who scored the most points now score the least, because 3000 becomes -3000), we can change the direction of the correlation.
-# Field goals are negatively correlated with our new "negative" points column -- the more free throws you attempt, the less negative points you score.
+# If we make points negative (so the people who scored the most points now score the least,
+# because 3000 becomes -3000), we can change the direction of the correlation.
+# Field goals are negatively correlated with our new "negative" points column -- the more
+# free throws you attempt, the less negative points you score.
 # We can see this because the correlation line slopes downward.
 plt.scatter(nba_stats["fga"], -nba_stats["pts"])
 plt.show()
 
-# Now, we can plot total rebounds (number of times someone got the ball back for their team after someone shot) vs total assists (number of times someone helped another person score).
+# Now, we can plot total rebounds (number of times someone got the ball back for
+# their team after someone shot) vs total assists (number of times someone helped another person score).
 # These are uncorrelated, so you don't see the same nice line as you see with the plot above.
 plt.scatter(nba_stats["trb"], nba_stats["ast"])
 plt.show()
@@ -114,3 +117,28 @@ plt.show()
 # steals
 plt.scatter(nba_stats["stl"], nba_stats["pf"])
 plt.show()
+
+
+# Make a function that calculates covariance.
+# STEPS:
+# First, calculate the mean of the x and y vectors.
+# # Then, subtract the mean from each element in the x vector.
+# Do the same for the y vectors.
+# Multiply the elements at each position by each other, starting at 0, and make a new vector.
+# Add up all of the elements in the new vector, then divide by its length.
+def covariance_a_b(a, b):
+    mean_a = sum(a) / len(a)
+    mean_b = sum(b) / len(b)
+    covariance = 0
+
+    # create a new vector by substracting the mean value from each element
+    substracted_a = [i - mean_a for i in a]
+    substracted_b = [i - mean_b for i in b]
+
+    codeviates = [substracted_a[i] * substracted_b[i] for i in range(len(a))]
+
+    covariance = sum(codeviates) / len(codeviates)
+    return covariance
+
+cov_stl_pf = covariance_a_b(nba_stats["stl"], nba_stats["pf"])
+cov_fta_pts = covariance_a_b(nba_stats["fta"], nba_stats["pts"])
